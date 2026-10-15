@@ -43,4 +43,10 @@ public abstract class MediaItem : IMedia, IComparable<MediaItem>
         
     }
     public virtual object Clone() => MemberwiseClone();
+    public virtual void Deconstruct(out int year, out Genre genre, out bool isAvailable)
+    {
+        year = Year;
+        genre = Genre;
+        isAvailable = IsAvailable;
+    }
 }

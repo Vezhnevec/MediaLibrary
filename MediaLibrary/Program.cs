@@ -2,8 +2,6 @@
 using MediaLibrary.Exceptions;
 using MediaLibrary.Extensions;
 using MediaLibrary.Helpers;
-using MediaLibrary.Extensions;
-using System.Security.Cryptography.X509Certificates;
 using MediaLibrary.Criteria;
 // ==================== 7. ГЛАВНОЕ МЕНЮ ====================
 MediaLibrary<MediaItem> mediaLibrary = new MediaLibrary<MediaItem>();
@@ -42,7 +40,11 @@ while (true)
     Console.WriteLine("14. Показать корзину");
     Console.WriteLine("15. Показать новинки");
     Console.WriteLine("16. Показать статистику");
+    Console.WriteLine("17. Показать категорию элемента");
     Console.WriteLine("18. Расширенный поиск");
+    Console.WriteLine("19. Показать эпоху элемента");
+    Console.WriteLine("20. Анализ корзины");
+    Console.WriteLine("21. Показать приоритет элемента");
     Console.WriteLine("======================");
     Console.Write("Выберите пункт меню: ");
 
@@ -203,7 +205,7 @@ while (true)
                 try
                 {
                     int searchId = ConsoleHelper.ReadInt("Введите ID элемента, который хотите добавить в корзину:");
-                    mediaLibrary.AddToBasket(searchId);
+                    mediaLibrary.AddToCart(searchId);
                 }
                 catch (ItemNotFoundException ex)
                 {
@@ -213,7 +215,7 @@ while (true)
             }
         case 14:
             {
-                mediaLibrary.PrintAllBasket();
+                mediaLibrary.PrintAllCart();
                 break;
             }
         case 15:
@@ -240,12 +242,25 @@ while (true)
                 Console.WriteLine($"Всего: {allItems}, Доступно: {available}, Выдано:{issued}");
                 break;
             }
+        case 17:
+            {
+                try
+                {
+                    int searchId = ConsoleHelper.ReadInt("Введите ID элемента, у которого хотите узнать категорию:");
+                    Console.WriteLine(mediaLibrary.GetCategory(mediaLibrary[searchId])); 
+                }
+                catch (ItemNotFoundException ex)
+                {
+                    Console.WriteLine($"✗ {ex.Message}");
+                }
+                break;
+            }
         case 18:
             {
                 var criteria = new MediaSearchCriteria
                 {
                     Title = ConsoleHelper.ReadOptionalString("Часть названия"),
-                    Genre = ConsoleHelper.ReadGenre(),
+                    Genre = ConsoleHelper.ReadOptionalGenre(),
                     MinYear = ConsoleHelper.ReadOptionalInt("Минимальный год выпуска"),
                 };
 
@@ -264,9 +279,47 @@ while (true)
                 }
                 break;
             }
+        case 19:
+            {
+                try
+                {
+                    int searchId = ConsoleHelper.ReadInt("Введите ID элемента, у которого хотите узнать эпоху:");
+                    var item = mediaLibrary.FindById(searchId);
 
+                    string era = item.GetEraByYear();
+
+                    Console.WriteLine($"'{item.Title}' ({item.Year} г.) относится к эпохе {era}");
+                }
+                catch (ItemNotFoundException ex)
+                {
+                    Console.WriteLine($"✗ {ex.Message}");
+                }
+                break;
+            }
+        case 20:
+            {
+                Console.WriteLine(mediaLibrary.GetCartSummary());
+                break;
+            }
+        case 21:
+            {
+                try
+                {
+                    int searchId = ConsoleHelper.ReadInt("Введите ID элемента, у которого хотите узнать приоритет:");
+                    var item = mediaLibrary.FindById(searchId);
+
+                    string priority = mediaLibrary.GetPriority(item);
+
+                    Console.WriteLine($"'{item.Title}' имеет приоритет: {priority}");
+                }
+                catch (ItemNotFoundException ex)
+                {
+                    Console.WriteLine($"✗ {ex.Message}");
+                }
+                break;
+            }
         default:
-            Console.WriteLine("Выберите корректный пункт меню (1-18).");
+            Console.WriteLine("Выберите корректный пункт меню (1-21).");
             break;
     }
 }
