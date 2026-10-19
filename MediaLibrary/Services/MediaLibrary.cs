@@ -5,6 +5,7 @@ using MediaLibrary.Exceptions;
 using MediaLibrary.Extensions;
 using MediaLibrary.Interface;
 using MediaLibrary.Queue;
+using System.Text;
 using System.Threading.Channels;
 
 public class MediaLibrary<T> where T : class, IMedia
@@ -170,8 +171,12 @@ public class MediaLibrary<T> where T : class, IMedia
         Book { Pages: < 100 } => "Легкое чтение",
         Movie { Duration: > 180 } => "Длинный метр",
         Movie { Duration: < 90 } => "Короткометражка",
-        Game { Platform: "PC" } => "ПК-эксклюзив",
-        Game { Platform: "PS5" or "Xbox" } => "Консольный эксклюзив",
+        Game g when g.Platform.Equals("PC", StringComparison.OrdinalIgnoreCase)
+        => "ПК-эксклюзив",
+
+        Game g when g.Platform.Equals("PS5", StringComparison.OrdinalIgnoreCase) ||
+                    g.Platform.Equals("XBOX", StringComparison.OrdinalIgnoreCase)
+            => "Консольный эксклюзив",
         _ when item.Year <= DateTime.Now.Year - 50 => "Классика",
         _ => "Стандартный элемент"
     };
@@ -220,7 +225,7 @@ public class MediaLibrary<T> where T : class, IMedia
 
     public void AddToWaitList(LendRequest lendRequest)
     {
-        _waitlist.Add(lendRequest); 
+        _waitlist.Add(lendRequest);
     }
     public void PrintWaitList()
     {
@@ -231,7 +236,7 @@ public class MediaLibrary<T> where T : class, IMedia
         }
         foreach (var item in _waitlist)
         {
-            Console.WriteLine($"Id позиции: {item.ItemId}, Имя читателя: {item.ReaderName}");
+            Console.WriteLine($"Id позиции: {item.ItemId}, Имя читателя: {item.ReaderName}, Email: {item.Email}");
         }
     }
 
@@ -262,10 +267,25 @@ public class MediaLibrary<T> where T : class, IMedia
         if (request != null)
         {
             satisfiedRequest = request;
-            _waitlist.Remove(request); 
+            _waitlist.Remove(request);
             return true;
         }
 
-        return false; 
+        return false;
+    }
+    public string GenerateCartReceipt()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine($"{DateTime.Now:dd.MM.yyyy HH:mm}");
+        sb.AppendLine("========================");
+        sb.AppendLine($"{"ID",-5} | {"Жанр",-10} | {"Название",-25} | {"Год",-6}");
+
+        foreach (var item in _cart)
+        {
+            sb.AppendLine($"{item.Id,-5} | {item.Genre,-10} | {item.Title,-25} | {item.Year,-6}");
+        }
+        sb.AppendLine("========================");
+        sb.AppendLine($"Всего позиций: {_cart.Count}");
+        return sb.ToString();
     }
 }

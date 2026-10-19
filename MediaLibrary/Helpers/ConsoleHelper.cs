@@ -1,4 +1,5 @@
 ﻿using MediaLibrary.Enums;
+using System.Text.RegularExpressions;
 
 namespace MediaLibrary.Helpers
 {
@@ -11,7 +12,7 @@ namespace MediaLibrary.Helpers
                 Console.WriteLine(prompt);
                 string input = Console.ReadLine();
                 if (!string.IsNullOrWhiteSpace(input))
-                    return input;
+                    return input.Trim();
                 Console.WriteLine("Значение не может быть пустым. Попробуйте снова.");
             }
         }
@@ -72,7 +73,7 @@ namespace MediaLibrary.Helpers
             Console.WriteLine("  0 - Пропустить");
             foreach (var genre in Enum.GetValues(typeof(Genre)))
             {
-                Console.WriteLine($"  {(int)genre + 1} - {genre}"); // Сдвинули на 1, чтобы 0 был пропуском
+                Console.WriteLine($"  {(int)genre + 1} - {genre}");
             }
 
             while (true)
@@ -95,6 +96,22 @@ namespace MediaLibrary.Helpers
                     return parsedGenre;
 
                 Console.WriteLine("Некорректный жанр. Попробуйте снова.");
+            }
+        }
+        public static string ReadEmail(string prompt)
+        {
+            string regex = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+
+            while (true)
+            {
+                Console.WriteLine(prompt);
+                string input = Console.ReadLine().Trim();
+                if (Regex.IsMatch(input, regex, RegexOptions.IgnoreCase))
+                {
+                    return input;
+                }
+
+                Console.WriteLine("Введен не корректный email");
             }
         }
     }

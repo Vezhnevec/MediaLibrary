@@ -15,7 +15,6 @@ public class Game : MediaItem
 
     public override string GetInfo()
     {
-        // ИСПРАВЛЕНО: убрано "мин." после платформы
         return $"[Игра] #{Id}: «{Title}», жанр: {Genre}, {Year} г., платформа: {Platform}, статус: {GetStatus()}";
     }
 }

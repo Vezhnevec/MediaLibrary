@@ -10,5 +10,6 @@ namespace MediaLibrary.Queue
     {
         public int ItemId { get; set; }
         public string? ReaderName { get; set; }
+        public string? Email { get; set; }
     }
 }

@@ -49,6 +49,7 @@ while (true)
     Console.WriteLine("22. Показать количество элементов по жанрам");
     Console.WriteLine("23. Показать последние просмотренные элементы");
     Console.WriteLine("24. Показать очередь ожидания");
+    Console.WriteLine("25. Оформить выдачу корзины (Чек)");
     Console.WriteLine("======================");
     Console.Write("Выберите пункт меню: ");
 
@@ -138,7 +139,6 @@ while (true)
             try
             {
                 mediaLibrary.Lend(lendId);
-                //Console.WriteLine("✓ Элемент успешно выдан!");
             }
             catch (ItemNotFoundException ex)
             {
@@ -152,7 +152,8 @@ while (true)
                     var lendRequest = new LendRequest()
                     {
                         ReaderName = ConsoleHelper.ReadString("Укажите своё имя"),
-                        ItemId = lendId
+                        ItemId = lendId,
+                        Email = ConsoleHelper.ReadEmail("Введите email")
                     };
                     mediaLibrary.AddToWaitList(lendRequest);
                     Console.WriteLine("Вы добавлены в очередь");
@@ -365,8 +366,13 @@ while (true)
                 mediaLibrary.PrintWaitList();
                 break;
             }
+        case 25:
+            {
+                Console.WriteLine(mediaLibrary.GenerateCartReceipt());
+                break;
+            }
         default:
-            Console.WriteLine("Выберите корректный пункт меню (1-24).");
+            Console.WriteLine("Выберите корректный пункт меню (1-25).");
             break;
     }
 }

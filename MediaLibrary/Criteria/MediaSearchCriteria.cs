@@ -17,8 +17,17 @@ namespace MediaLibrary.Criteria
                
         public bool Matches(IMedia item)
         {
-            if (!string.IsNullOrEmpty(Title) && !item.Title.Contains(Title, StringComparison.OrdinalIgnoreCase))
-                return false;
+            string[] userWords = Title.Split(' ');
+            foreach (var word in userWords)
+            {
+                if (string.IsNullOrEmpty(word))
+                    continue;
+
+                if (!item.Title.Contains(word, StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+            }
 
             if (Genre.HasValue && Genre.Value != item.Genre)
                 return false;
