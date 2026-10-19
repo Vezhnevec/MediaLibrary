@@ -3,6 +3,7 @@ using MediaLibrary.Exceptions;
 using MediaLibrary.Extensions;
 using MediaLibrary.Helpers;
 using MediaLibrary.Criteria;
+using MediaLibrary.Queue;
 // ==================== 7. ГЛАВНОЕ МЕНЮ ====================
 MediaLibrary<MediaItem> mediaLibrary = new MediaLibrary<MediaItem>();
 
@@ -45,6 +46,9 @@ while (true)
     Console.WriteLine("19. Показать эпоху элемента");
     Console.WriteLine("20. Анализ корзины");
     Console.WriteLine("21. Показать приоритет элемента");
+    Console.WriteLine("22. Показать количество элементов по жанрам");
+    Console.WriteLine("23. Показать последние просмотренные элементы");
+    Console.WriteLine("24. Показать очередь ожидания");
     Console.WriteLine("======================");
     Console.Write("Выберите пункт меню: ");
 
@@ -142,7 +146,18 @@ while (true)
             }
             catch (ItemNotAvailableException ex)
             {
-                Console.WriteLine($"✗ {ex.Message}");
+                string userInput = ConsoleHelper.ReadString("Элемент выдан. Хотите встать в очередь ожидания? (да/нет)");
+                if (userInput.Equals("да", StringComparison.OrdinalIgnoreCase))
+                {
+                    var lendRequest = new LendRequest()
+                    {
+                        ReaderName = ConsoleHelper.ReadString("Укажите своё имя"),
+                        ItemId = lendId
+                    };
+                    mediaLibrary.AddToWaitList(lendRequest);
+                    Console.WriteLine("Вы добавлены в очередь");
+                }
+                //Console.WriteLine($"✗ {ex.Message}");
             }
             break;
 
@@ -151,7 +166,15 @@ while (true)
             try
             {
                 mediaLibrary.Return(returnId);
-                //Console.WriteLine("✓ Элемент успешно возвращён!");
+
+                if (mediaLibrary.TryProcessWaitlist(returnId, out var satisfiedRequest))
+                {
+                    Console.WriteLine($"✓ Элемент возвращен. Уведомление отправлено: {satisfiedRequest.ReaderName} (ждал именно эту позицию).");
+                }
+                else
+                {
+                    Console.WriteLine("✓ Элемент успешно возвращён в общий доступ!");
+                }
             }
             catch (ItemNotFoundException ex)
             {
@@ -318,8 +341,32 @@ while (true)
                 }
                 break;
             }
+        case 22:
+            {
+                var stasisticGenre = mediaLibrary.GetGroupedByGenre();
+
+                foreach (var item in stasisticGenre)
+                {
+                    Console.WriteLine($"Жанр: {item.Key} = {item.Value}");
+                }
+                break;
+            }
+        case 23:
+            {
+                var result = mediaLibrary.GetRecentlyViewed();
+                foreach (var item in result)
+                {
+                    Console.WriteLine($"{item.GetInfo()}");
+                }
+                break;
+            }
+        case 24:
+            {
+                mediaLibrary.PrintWaitList();
+                break;
+            }
         default:
-            Console.WriteLine("Выберите корректный пункт меню (1-21).");
+            Console.WriteLine("Выберите корректный пункт меню (1-24).");
             break;
     }
 }

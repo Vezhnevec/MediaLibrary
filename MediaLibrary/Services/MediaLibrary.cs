@@ -1,10 +1,11 @@
 ﻿// ==================== 5. ОБОБЩЁННЫЙ РЕПОЗИТОРИЙ ====================
-using MediaLibrary.Exceptions;
-using MediaLibrary.Interface;
-using MediaLibrary.Extensions;
 using MediaLibrary.Criteria;
-using System.Threading.Channels;
 using MediaLibrary.Enums;
+using MediaLibrary.Exceptions;
+using MediaLibrary.Extensions;
+using MediaLibrary.Interface;
+using MediaLibrary.Queue;
+using System.Threading.Channels;
 
 public class MediaLibrary<T> where T : class, IMedia
 {
@@ -13,10 +14,13 @@ public class MediaLibrary<T> where T : class, IMedia
     public event Action<T> OnItemAdd;
     private readonly List<T> _items = new List<T>();
     private readonly List<T> _cart = new List<T>();
-
+    private readonly Dictionary<int, T> _itemsById = new Dictionary<int, T>();
+    private readonly Stack<T> _recentlyViewed = new Stack<T>();
+    private readonly List<LendRequest> _waitlist = new List<LendRequest>();
     public void Add(T item)
     {
         _items.Add(item);
+        _itemsById.Add(item.Id, item);
     }
 
     public void PrintAll()
@@ -34,10 +38,18 @@ public class MediaLibrary<T> where T : class, IMedia
 
     public T FindById(int id)
     {
-        var item = _items.Find(p => p.Id == id);
-        if (item == null)
-            throw new ItemNotFoundException(id);
-        return item;
+        if (_itemsById.TryGetValue(id, out T? value))
+        {
+            if (_recentlyViewed.Count > 0 && _recentlyViewed.Peek().Id == value.Id)
+                return value;
+
+            if (_recentlyViewed.Count >= 5)
+                _recentlyViewed.Pop();
+
+            _recentlyViewed.Push(value);
+            return value;
+        }
+        throw new ItemNotFoundException(id);
     }
 
     public T this[int id]
@@ -47,7 +59,7 @@ public class MediaLibrary<T> where T : class, IMedia
 
     public bool Lend(int id)
     {
-        var item = FindById(id); 
+        var item = FindById(id);
 
         if (!item.IsAvailable)
             throw new ItemNotAvailableException(id);
@@ -79,7 +91,7 @@ public class MediaLibrary<T> where T : class, IMedia
             {
                 result.Add(item);
             }
-            
+
         }
         return result;
     }
@@ -137,6 +149,15 @@ public class MediaLibrary<T> where T : class, IMedia
         {
             if (criteria.Matches(item))
             {
+                if (_recentlyViewed.Count >= 5)
+                {
+                    _recentlyViewed.Pop();
+                    _recentlyViewed.Push(item);
+                }
+                else
+                {
+                    _recentlyViewed.Push(item);
+                }
                 results.Add(item);
             }
         }
@@ -154,7 +175,7 @@ public class MediaLibrary<T> where T : class, IMedia
         _ when item.Year <= DateTime.Now.Year - 50 => "Классика",
         _ => "Стандартный элемент"
     };
-    public string GetCartSummary() 
+    public string GetCartSummary()
     {
         return (_cart) switch
         {
@@ -175,5 +196,76 @@ public class MediaLibrary<T> where T : class, IMedia
         (_, Genre.RPG or Genre.Strategy, true) => "Средний приоритет",
         _ => "Низкий приоритет"
     };
-    
+
+    public Dictionary<Genre, int> GetGroupedByGenre()
+    {
+        var genrCounts = new Dictionary<Genre, int>();
+
+        foreach (var item in _items)
+        {
+            Genre genre = item.Genre;
+
+            if (!genrCounts.ContainsKey(genre))
+            {
+                genrCounts[genre] = 0;
+            }
+            genrCounts[genre]++;
+        }
+        return genrCounts;
+    }
+    public IEnumerable<T> GetRecentlyViewed()
+    {
+        return _recentlyViewed;
+    }
+
+    public void AddToWaitList(LendRequest lendRequest)
+    {
+        _waitlist.Add(lendRequest); 
+    }
+    public void PrintWaitList()
+    {
+        if (_waitlist.Count == 0)
+        {
+            Console.WriteLine("Лист ожидания пустой");
+            return;
+        }
+        foreach (var item in _waitlist)
+        {
+            Console.WriteLine($"Id позиции: {item.ItemId}, Имя читателя: {item.ReaderName}");
+        }
+    }
+
+    public IEnumerable<T> Filter(Func<T, bool> predicate)
+    {
+        foreach (T item in _items)
+        {
+            if (predicate(item))
+            {
+                yield return item;
+            }
+        }
+    }
+    public List<T> GetLastAdded(int count)
+    {
+        int actualCount = Math.Min(count, _items.Count);
+
+        if (actualCount == 0) return new List<T>();
+
+        return _items[^actualCount..].ToList();
+    }
+    public bool TryProcessWaitlist(int returnedItemId, out LendRequest? satisfiedRequest)
+    {
+        satisfiedRequest = null;
+
+        var request = _waitlist.FirstOrDefault(r => r.ItemId == returnedItemId);
+
+        if (request != null)
+        {
+            satisfiedRequest = request;
+            _waitlist.Remove(request); 
+            return true;
+        }
+
+        return false; 
+    }
 }
