@@ -305,9 +305,11 @@ public class MediaLibrary<T> where T : class, IMedia
 
             if (today > item.DueDate)
             {
-                TimeSpan overdue = today - item.DueDate.Value;
-                return $"Просрочено. Просрочка {overdue.Days} дн. (Срок был до {item.DueDate.Value:dd.MM.yyyy})";
+                int days = today.DayNumber - dueDate.DayNumber;
+                return $"Просрочено. Просрочка {days} дн. (Срок был до {item.DueDate.Value:dd.MM.yyyy})";
             }
+            return $"Элемент на руках. Срок возврата: {dueDate:dd.MM.yyyy}, осталось {(dueDate.DayNumber - today.DayNumber)} дн.";
         }
+        return "Элемент на руках, но срок возврата не установлен";
     }
 }

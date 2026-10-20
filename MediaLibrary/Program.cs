@@ -50,6 +50,7 @@ while (true)
     Console.WriteLine("23. Показать последние просмотренные элементы");
     Console.WriteLine("24. Показать очередь ожидания");
     Console.WriteLine("25. Оформить выдачу корзины (Чек)");
+    Console.WriteLine("26. Проверить срок возврата элемента");
     Console.WriteLine("======================");
     Console.Write("Выберите пункт меню: ");
 
@@ -369,6 +370,19 @@ while (true)
         case 25:
             {
                 Console.WriteLine(mediaLibrary.GenerateCartReceipt());
+                break;
+            }
+        case 26:
+            {
+                try
+                {
+                    int searchId = ConsoleHelper.ReadInt("Введите ID элемента, у которого хотите проверить срок возврата:");
+                    Console.WriteLine(mediaLibrary.CheckOverdueStatus(searchId));
+                }
+                catch (ItemNotFoundException ex)
+                {
+                    Console.WriteLine($"✗ {ex.Message}");
+                }
                 break;
             }
         default:
