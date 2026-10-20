@@ -14,6 +14,7 @@ public abstract class MediaItem : IMedia, IComparable<MediaItem>
     public Genre Genre { get; set; }
     public int Year { get; set; }
     public bool IsAvailable { get; set; } = true;
+    public DateOnly? DueDate { get; set; }
 
     protected MediaItem(string title, Genre genre, int year)
     {

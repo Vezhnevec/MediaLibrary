@@ -66,6 +66,7 @@ public class MediaLibrary<T> where T : class, IMedia
             throw new ItemNotAvailableException(id);
 
         item.IsAvailable = false;
+        item.DueDate = DateOnly.FromDateTime(DateTime.Now).AddDays(14);
         OnItemLended?.Invoke(item);
         return true;
     }
@@ -78,6 +79,7 @@ public class MediaLibrary<T> where T : class, IMedia
             throw new ItemAlreadyReturnedException(id);
 
         item.IsAvailable = true;
+        item.DueDate = null;
         OnItemReturned?.Invoke(item);
         return true;
     }
@@ -287,5 +289,25 @@ public class MediaLibrary<T> where T : class, IMedia
         sb.AppendLine("========================");
         sb.AppendLine($"Всего позиций: {_cart.Count}");
         return sb.ToString();
+    }
+    public string CheckOverdueStatus(int id)
+    {
+        var item = FindById(id);
+
+        if (item.IsAvailable)
+            return "Элемент доступен и не находиться на руках";
+
+        DateOnly today = DateOnly.FromDateTime(DateTime.Now);
+
+        if (item.DueDate.HasValue)
+        {
+            DateOnly dueDate = item.DueDate.Value;
+
+            if (today > item.DueDate)
+            {
+                TimeSpan overdue = today - item.DueDate.Value;
+                return $"Просрочено. Просрочка {overdue.Days} дн. (Срок был до {item.DueDate.Value:dd.MM.yyyy})";
+            }
+        }
     }
 }

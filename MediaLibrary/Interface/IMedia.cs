@@ -14,6 +14,7 @@ namespace MediaLibrary.Interface
         int Year { get; set; }
         Genre Genre { get; set; }
         bool IsAvailable { get; set; }
+        public DateOnly? DueDate { get; set; }
         string GetInfo();
         void Deconstruct(out int year, out Genre genre, out bool isAvailable);
 
