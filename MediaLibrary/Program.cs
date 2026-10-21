@@ -4,6 +4,7 @@ using MediaLibrary.Extensions;
 using MediaLibrary.Helpers;
 using MediaLibrary.Criteria;
 using MediaLibrary.Queue;
+using MediaLibrary.Models;
 // ==================== 7. ГЛАВНОЕ МЕНЮ ====================
 MediaLibrary<MediaItem> mediaLibrary = new MediaLibrary<MediaItem>();
 
@@ -51,6 +52,9 @@ while (true)
     Console.WriteLine("24. Показать очередь ожидания");
     Console.WriteLine("25. Оформить выдачу корзины (Чек)");
     Console.WriteLine("26. Проверить срок возврата элемента");
+    Console.WriteLine("27. Добавить объект в кинопоказ");
+    Console.WriteLine("28. Показать расписание кинопоказа");
+    Console.WriteLine("29. Сформировать отчет за период");
     Console.WriteLine("======================");
     Console.Write("Выберите пункт меню: ");
 
@@ -68,10 +72,10 @@ while (true)
             {
                 string title = ConsoleHelper.ReadString("Название книги:");
                 Genre genre = ConsoleHelper.ReadGenre();
-                int year = ConsoleHelper.ReadInt("Год выпуска:");
+                DateOnly releaseDate = ConsoleHelper.ReadDate("Дата релиза:");
                 int pages = ConsoleHelper.ReadInt("Количество страниц:");
 
-                Book book = new Book(title, genre, year, pages);
+                Book book = new Book(title, genre, releaseDate, pages);
                 mediaLibrary.Add(book);
                 Console.WriteLine($"✓ Книга «{title}» успешно добавлена!");
             }
@@ -86,10 +90,10 @@ while (true)
             {
                 string title = ConsoleHelper.ReadString("Название фильма:");
                 Genre genre = ConsoleHelper.ReadGenre();
-                int year = ConsoleHelper.ReadInt("Год выпуска:");
+                DateOnly releaseDate = ConsoleHelper.ReadDate("Дата релиза:");
                 int duration = ConsoleHelper.ReadInt("Длительность (мин):");
 
-                Movie movie = new Movie(title, genre, year, duration);
+                Movie movie = new Movie(title, genre, releaseDate, duration);
                 mediaLibrary.Add(movie);
                 Console.WriteLine($"✓ Фильм «{title}» успешно добавлен!");
             }
@@ -104,10 +108,10 @@ while (true)
             {
                 string title = ConsoleHelper.ReadString("Название игры:");
                 Genre genre = ConsoleHelper.ReadGenre();
-                int year = ConsoleHelper.ReadInt("Год выпуска:");
+                DateOnly releaseDate = ConsoleHelper.ReadDate("Дата релиза:");
                 string platform = ConsoleHelper.ReadString("Платформа (PC, PS5, Xbox и т.д.):");
 
-                Game game = new Game(title, genre, year, platform);
+                Game game = new Game(title, genre, releaseDate, platform);
                 mediaLibrary.Add(game);
                 Console.WriteLine($"✓ Игра «{title}» успешно добавлена!");
             }
@@ -378,6 +382,56 @@ while (true)
                 {
                     int searchId = ConsoleHelper.ReadInt("Введите ID элемента, у которого хотите проверить срок возврата:");
                     Console.WriteLine(mediaLibrary.CheckOverdueStatus(searchId));
+                }
+                catch (ItemNotFoundException ex)
+                {
+                    Console.WriteLine($"✗ {ex.Message}");
+                }
+                break;
+            }
+        case 27:
+            {
+                try
+                {
+                    int searchId = ConsoleHelper.ReadInt("Введите ID фильма, коорый хотите добавить в кинопоказ:");
+                    var item = mediaLibrary.FindById(searchId);
+
+                    if (item is Movie movie)
+                    {
+                        var screening = new Screening
+                        {
+                            MovieId = movie.Id,
+                            MovieTitle = movie.Title,
+                            Date = ConsoleHelper.ReadDate("Введите дату начала показа"),
+                            StartTime = ConsoleHelper.ReadTime("Введите время начала показа"),
+                            DurationMinutes = movie.Duration
+                        };
+                        mediaLibrary.AddScreenning(screening);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Этот элемент не являеттся фильмом");
+                    }
+                    
+                }
+                catch (ItemNotFoundException ex)
+                {
+                    Console.WriteLine($"✗ {ex.Message}");
+                }
+                break;
+            }
+        case 28:
+            {
+                Console.WriteLine(mediaLibrary.PrintScreeningSchedule()); 
+                break;
+            }
+        case 29:
+            {
+                try
+                {
+                    DateOnly startDate = ConsoleHelper.ReadDate("Введите начальную дату");
+                    DateOnly endDate = ConsoleHelper.ReadDate("Введите конечную дату");
+                    Console.WriteLine(mediaLibrary.GenerateActivityReport(startDate, endDate));
                 }
                 catch (ItemNotFoundException ex)
                 {

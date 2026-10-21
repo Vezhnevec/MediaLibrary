@@ -114,5 +114,42 @@ namespace MediaLibrary.Helpers
                 Console.WriteLine("Введен не корректный email");
             }
         }
+        public static DateOnly ReadDate(string prompt)
+        {
+            while (true)
+            {
+                Console.WriteLine($"{prompt} (формат: ДД.ММ.ГГГГ, например, 25.10.2023):");
+                string input = Console.ReadLine()?.Trim();
+
+                if (DateOnly.TryParseExact(input, "dd.MM.yyyy", out DateOnly result))
+                {
+                    return result;
+                }
+
+                string[] formats = { "dd.MM.yyyy", "dd/MM/yyyy", "dd-MM-yyyy", "yyyyMMdd" };
+                if (DateOnly.TryParseExact(input, formats, System.Globalization.CultureInfo.InvariantCulture,
+                    System.Globalization.DateTimeStyles.None, out result))
+                {
+                    return result;
+                }
+
+                Console.WriteLine("Некорректный формат даты. Используйте ДД.ММ.ГГГГ.");
+            }
+        }
+        public static TimeOnly ReadTime(string prompt)
+        {
+            while (true)
+            {
+                Console.WriteLine($"{prompt} (формат: ЧЧ:ММ, например, 12:20):");
+                string input = Console.ReadLine()?.Trim();
+
+                if (TimeOnly.TryParseExact(input, "HH:mm", out TimeOnly result))
+                {
+                    return result;
+                }
+
+                Console.WriteLine("Некорректный формат даты. Используйте ЧЧ:ММ.");
+            }
+        }
     }
 }

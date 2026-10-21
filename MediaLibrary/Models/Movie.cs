@@ -5,8 +5,8 @@ public class Movie : MediaItem
 {
     public int Duration { get; set; }
 
-    public Movie(string title, Genre genre, int year, int duration)
-        : base(title, genre, year)
+    public Movie(string title, Genre genre, DateOnly releaseDate, int duration)
+        : base(title, genre, releaseDate)
     {
         if (duration <= 0)
             throw new InvalidMediaDataException("Длительность должна быть больше 0");

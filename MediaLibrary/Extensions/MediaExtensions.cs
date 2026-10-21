@@ -24,5 +24,34 @@ namespace MediaLibrary.Extensions
                 >= 2020 => "Современность"
             };
         }
+        public static (int Years, int Months, int Days) GetDetailedAge(this IMedia media)
+        {
+            DateOnly releaseDate = media.ReleaseDate;
+            DateOnly today = DateOnly.FromDateTime(DateTime.Now);
+
+            if (releaseDate > today) return (0, 0, 0);
+
+            int years = today.Year - releaseDate.Year;
+            if (releaseDate.AddYears(years) > today)
+            {
+                years--;
+            }
+
+            DateOnly dateAfterYears = releaseDate.AddYears(years);
+
+
+            int months = (today.Year - dateAfterYears.Year) * 12 + (today.Month - dateAfterYears.Month);
+            if (dateAfterYears.AddMonths(months) > today)
+            {
+                months--;
+            }
+
+            DateOnly dateAfterMonths = dateAfterYears.AddMonths(months);
+
+
+            int days = today.DayNumber - dateAfterMonths.DayNumber;
+
+            return (years, months, days);
+        }
     }
 }

@@ -5,8 +5,8 @@ public class Game : MediaItem
 {
     public string Platform { get; set; }
 
-    public Game(string title, Genre genre, int year, string platform)
-        : base(title, genre, year)
+    public Game(string title, Genre genre, DateOnly releaseDate, string platform)
+        : base(title, genre, releaseDate)
     {
         if (string.IsNullOrWhiteSpace(platform))
             throw new InvalidMediaDataException("Платформа не может быть пустой");

@@ -6,8 +6,8 @@ public class Book : MediaItem
 {
     public int Pages { get; set; }
 
-    public Book(string title, Genre genre, int year, int pages)
-        : base(title, genre, year)
+    public Book(string title, Genre genre, DateOnly releaseDate, int pages)
+        : base(title, genre, releaseDate)
     {
         if (pages <= 0)
             throw new InvalidMediaDataException("Количество страниц должно быть больше 0");

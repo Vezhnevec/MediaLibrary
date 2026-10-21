@@ -11,10 +11,11 @@ namespace MediaLibrary.Interface
     {
         int Id { get; }
         string Title { get; set; }
-        int Year { get; set; }
+        int Year => ReleaseDate.Year;
         Genre Genre { get; set; }
         bool IsAvailable { get; set; }
         public DateOnly? DueDate { get; set; }
+        public DateOnly ReleaseDate { get; set; }
         string GetInfo();
         void Deconstruct(out int year, out Genre genre, out bool isAvailable);
 

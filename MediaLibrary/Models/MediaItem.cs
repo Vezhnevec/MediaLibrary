@@ -15,8 +15,10 @@ public abstract class MediaItem : IMedia, IComparable<MediaItem>
     public int Year { get; set; }
     public bool IsAvailable { get; set; } = true;
     public DateOnly? DueDate { get; set; }
+    public DateOnly ReleaseDate { get; set; }
 
-    protected MediaItem(string title, Genre genre, int year)
+
+    protected MediaItem(string title, Genre genre, DateOnly releaseDate)
     {
         Id = _nextId++;
 
@@ -24,9 +26,7 @@ public abstract class MediaItem : IMedia, IComparable<MediaItem>
             throw new InvalidMediaDataException("Название не может быть пустым");
         Title = title;
 
-        if (year < 0 || year > DateTime.Now.Year)
-            throw new InvalidMediaDataException($"Год должен быть от 0 до {DateTime.Now.Year}");
-        Year = year;
+        ReleaseDate = releaseDate;
 
         Genre = genre;
     }

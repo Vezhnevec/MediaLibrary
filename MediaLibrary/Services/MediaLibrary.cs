@@ -4,7 +4,9 @@ using MediaLibrary.Enums;
 using MediaLibrary.Exceptions;
 using MediaLibrary.Extensions;
 using MediaLibrary.Interface;
+using MediaLibrary.Models;
 using MediaLibrary.Queue;
+using System.Globalization;
 using System.Text;
 using System.Threading.Channels;
 
@@ -18,6 +20,7 @@ public class MediaLibrary<T> where T : class, IMedia
     private readonly Dictionary<int, T> _itemsById = new Dictionary<int, T>();
     private readonly Stack<T> _recentlyViewed = new Stack<T>();
     private readonly List<LendRequest> _waitlist = new List<LendRequest>();
+    private readonly List<Screening> _screening = new List<Screening>();
     public void Add(T item)
     {
         _items.Add(item);
@@ -311,5 +314,41 @@ public class MediaLibrary<T> where T : class, IMedia
             return $"Элемент на руках. Срок возврата: {dueDate:dd.MM.yyyy}, осталось {(dueDate.DayNumber - today.DayNumber)} дн.";
         }
         return "Элемент на руках, но срок возврата не установлен";
+    }
+    public void AddScreenning(Screening item)
+    {
+        _screening.Add(item);
+    }
+    public string PrintScreeningSchedule()
+    {
+        StringBuilder sb = new StringBuilder();
+        foreach (var item in _screening)
+        {
+            TimeOnly endTime = item.StartTime.Add(TimeSpan.FromMinutes(item.DurationMinutes));
+
+            sb.AppendLine($"Фильм: '{item.MovieTitle}' | {item.Date:dd.MM.yyyy} | Начало: {item.StartTime:HH:mm} | Конец: {endTime:HH:mm}");
+        }
+        return sb.ToString();
+    }
+    public string GenerateActivityReport(DateOnly startDate, DateOnly endDate)
+    {
+        if (startDate > endDate)
+        {
+            return "Стартовая дата больше конечной";
+        }
+        StringBuilder sb = new StringBuilder();
+
+        List<T> filtered = new List<T>(_items);
+
+        filtered.RemoveAll(item => item.ReleaseDate < startDate || item.ReleaseDate > endDate);
+
+        filtered.Sort((a, b) => a.ReleaseDate.CompareTo(b.ReleaseDate));
+
+        foreach (var item in filtered)
+        {
+            sb.AppendLine($"{item.ReleaseDate.ToString("dddd, dd MMMM yyyy г.", new CultureInfo("ru-RU"))} Название элемента: {item.Title}");
+        }
+        sb.AppendLine($"Найдено {filtered.Count} элементов за период с {startDate} по {endDate}");
+        return sb.ToString();
     }
 }
