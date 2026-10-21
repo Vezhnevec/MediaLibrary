@@ -16,6 +16,6 @@ public class Book : MediaItem
 
     public override string GetInfo()
     {
-        return $"[Книга] #{Id}: «{Title}», жанр: {Genre}, {Year} г., {Pages} стр., статус: {GetStatus()}";
+        return $"[Книга] #{Id}: «{Title}», жанр: {Genre}, {ReleaseDate.Year} г., {Pages} стр., статус: {GetStatus()}";
     }
 }

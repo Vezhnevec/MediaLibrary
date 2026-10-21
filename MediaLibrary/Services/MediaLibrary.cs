@@ -315,7 +315,7 @@ public class MediaLibrary<T> where T : class, IMedia
         }
         return "Элемент на руках, но срок возврата не установлен";
     }
-    public void AddScreenning(Screening item)
+    public void AddScreening(Screening item)
     {
         _screening.Add(item);
     }
@@ -336,6 +336,7 @@ public class MediaLibrary<T> where T : class, IMedia
         {
             return "Стартовая дата больше конечной";
         }
+
         StringBuilder sb = new StringBuilder();
 
         List<T> filtered = new List<T>(_items);
@@ -343,7 +344,7 @@ public class MediaLibrary<T> where T : class, IMedia
         filtered.RemoveAll(item => item.ReleaseDate < startDate || item.ReleaseDate > endDate);
 
         filtered.Sort((a, b) => a.ReleaseDate.CompareTo(b.ReleaseDate));
-
+        if (filtered.Count == 0) return "Нет элементов за указанный период.";
         foreach (var item in filtered)
         {
             sb.AppendLine($"{item.ReleaseDate.ToString("dddd, dd MMMM yyyy г.", new CultureInfo("ru-RU"))} Название элемента: {item.Title}");

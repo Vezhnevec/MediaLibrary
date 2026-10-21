@@ -15,6 +15,6 @@ public class Game : MediaItem
 
     public override string GetInfo()
     {
-        return $"[Игра] #{Id}: «{Title}», жанр: {Genre}, {Year} г., платформа: {Platform}, статус: {GetStatus()}";
+        return $"[Игра] #{Id}: «{Title}», жанр: {Genre}, {ReleaseDate.Year} г., платформа: {Platform}, статус: {GetStatus()}";
     }
 }

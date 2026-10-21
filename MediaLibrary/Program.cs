@@ -55,6 +55,7 @@ while (true)
     Console.WriteLine("27. Добавить объект в кинопоказ");
     Console.WriteLine("28. Показать расписание кинопоказа");
     Console.WriteLine("29. Сформировать отчет за период");
+    Console.WriteLine("30. Узнать точный возраст элемента");
     Console.WriteLine("======================");
     Console.Write("Выберите пункт меню: ");
 
@@ -209,7 +210,7 @@ while (true)
         case 10: //Показать элементы, выпущенные после указанной даты
             {
                 int targetYear = ConsoleHelper.ReadInt("Введите год:");
-                var recentItems = mediaLibrary.FindAll(item => item.Year >= targetYear);
+                var recentItems = mediaLibrary.FindAll(item => item.ReleaseDate.Year >= targetYear);
                 foreach (var item in recentItems)
                 {
                     Console.WriteLine($"Найдено: {item.GetInfo()}");
@@ -218,7 +219,7 @@ while (true)
             }
         case 11:
             {
-                mediaLibrary.Sort((a, b) => b.Year.CompareTo(a.Year));
+                mediaLibrary.Sort((a, b) => b.ReleaseDate.Year.CompareTo(a.ReleaseDate.Year));
                 mediaLibrary.PrintAll();
                 break;
             }
@@ -317,7 +318,7 @@ while (true)
 
                     string era = item.GetEraByYear();
 
-                    Console.WriteLine($"'{item.Title}' ({item.Year} г.) относится к эпохе {era}");
+                    Console.WriteLine($"'{item.Title}' ({item.ReleaseDate.Year} г.) относится к эпохе {era}");
                 }
                 catch (ItemNotFoundException ex)
                 {
@@ -406,7 +407,7 @@ while (true)
                             StartTime = ConsoleHelper.ReadTime("Введите время начала показа"),
                             DurationMinutes = movie.Duration
                         };
-                        mediaLibrary.AddScreenning(screening);
+                        mediaLibrary.AddScreening(screening);
                     }
                     else
                     {
@@ -432,6 +433,23 @@ while (true)
                     DateOnly startDate = ConsoleHelper.ReadDate("Введите начальную дату");
                     DateOnly endDate = ConsoleHelper.ReadDate("Введите конечную дату");
                     Console.WriteLine(mediaLibrary.GenerateActivityReport(startDate, endDate));
+                }
+                catch (ItemNotFoundException ex)
+                {
+                    Console.WriteLine($"✗ {ex.Message}");
+                }
+                break;
+            }
+        case 30:
+            {
+                try
+                {
+                    int searchId = ConsoleHelper.ReadInt("Введите ID элемента, у которого хотите узнать точный возраст:");
+                    var item = mediaLibrary.FindById(searchId);
+
+                    var age = item.GetDetailedAge();
+
+                    Console.WriteLine($"Выпущено {age.Years} года, {age.Months} месяцев и {age.Days} дней назад");
                 }
                 catch (ItemNotFoundException ex)
                 {

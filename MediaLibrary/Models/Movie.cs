@@ -15,6 +15,6 @@ public class Movie : MediaItem
 
     public override string GetInfo()
     {
-        return $"[Фильм] #{Id}: «{Title}», жанр: {Genre}, {Year} г., {Duration} мин., статус: {GetStatus()}";
+        return $"[Фильм] #{Id}: «{Title}», жанр: {Genre}, {ReleaseDate.Year} г., {Duration} мин., статус: {GetStatus()}";
     }
 }
