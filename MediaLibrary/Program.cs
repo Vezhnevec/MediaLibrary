@@ -440,7 +440,7 @@ while (true)
                 break;
             }
         default:
-            Console.WriteLine("Выберите корректный пункт меню (1-25).");
+            Console.WriteLine("Выберите корректный пункт меню (1-29).");
             break;
     }
 }
