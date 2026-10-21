@@ -298,7 +298,7 @@ public class MediaLibrary<T> where T : class, IMedia
         var item = FindById(id);
 
         if (item.IsAvailable)
-            return "Элемент доступен и не находиться на руках";
+            return "Элемент доступен и не находится на руках";
 
         DateOnly today = DateOnly.FromDateTime(DateTime.Now);
 
@@ -306,12 +306,15 @@ public class MediaLibrary<T> where T : class, IMedia
         {
             DateOnly dueDate = item.DueDate.Value;
 
-            if (today > item.DueDate)
-            {
-                int days = today.DayNumber - dueDate.DayNumber;
-                return $"Просрочено. Просрочка {days} дн. (Срок был до {item.DueDate.Value:dd.MM.yyyy})";
-            }
-            return $"Элемент на руках. Срок возврата: {dueDate:dd.MM.yyyy}, осталось {(dueDate.DayNumber - today.DayNumber)} дн.";
+            int diff = today.DayNumber - dueDate.DayNumber;
+
+            if (diff > 0)
+                return $"Просрочено на {diff} дн. (Срок был до {dueDate:dd.MM.yyyy})";
+
+            if (diff == 0)
+                return $"Срок возврата ИСТЕКАЕТ СЕГОДНЯ ({dueDate:dd.MM.yyyy})";
+
+            return $"Элемент на руках. Срок возврата: {dueDate:dd.MM.yyyy}, осталось {Math.Abs(diff)} дн.";
         }
         return "Элемент на руках, но срок возврата не установлен";
     }

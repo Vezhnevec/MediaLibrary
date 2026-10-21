@@ -12,7 +12,7 @@ public abstract class MediaItem : IMedia, IComparable<MediaItem>
     public int Id { get; }
     public string Title { get; set; }
     public Genre Genre { get; set; }
-    int Year => ReleaseDate.Year;
+    public int Year => ReleaseDate.Year;
     public bool IsAvailable { get; set; } = true;
     public DateOnly? DueDate { get; set; }
     public DateOnly ReleaseDate { get; set; }
