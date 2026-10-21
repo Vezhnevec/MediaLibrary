@@ -434,9 +434,9 @@ while (true)
                     DateOnly endDate = ConsoleHelper.ReadDate("Введите конечную дату");
                     Console.WriteLine(mediaLibrary.GenerateActivityReport(startDate, endDate));
                 }
-                catch (ItemNotFoundException ex)
+                catch (FormatException ex)
                 {
-                    Console.WriteLine($"✗ {ex.Message}");
+                    Console.WriteLine($"Неверный формат даты: {ex.Message}");
                 }
                 break;
             }

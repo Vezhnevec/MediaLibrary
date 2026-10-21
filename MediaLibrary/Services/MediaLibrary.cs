@@ -182,7 +182,7 @@ public class MediaLibrary<T> where T : class, IMedia
         Game g when g.Platform.Equals("PS5", StringComparison.OrdinalIgnoreCase) ||
                     g.Platform.Equals("XBOX", StringComparison.OrdinalIgnoreCase)
             => "Консольный эксклюзив",
-        _ when item.Year <= DateTime.Now.Year - 50 => "Классика",
+        _ when item.ReleaseDate.Year <= DateTime.Now.Year - 50 => "Классика",
         _ => "Стандартный элемент"
     };
     public string GetCartSummary()

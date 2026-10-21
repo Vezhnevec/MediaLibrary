@@ -11,7 +11,7 @@ namespace MediaLibrary.Interface
     {
         int Id { get; }
         string Title { get; set; }
-        int Year => ReleaseDate.Year;
+        int Year { get; }
         Genre Genre { get; set; }
         bool IsAvailable { get; set; }
         public DateOnly? DueDate { get; set; }
