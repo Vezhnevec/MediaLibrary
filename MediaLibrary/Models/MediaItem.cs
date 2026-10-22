@@ -40,8 +40,7 @@ public abstract class MediaItem : IMedia, IComparable<MediaItem>
     public int CompareTo(MediaItem? mediaItem)
     {
         if (mediaItem is null) throw new ArgumentException("Некорректное значение параметра");
-        return Year.CompareTo(mediaItem.Year);
-        
+        return ReleaseDate.CompareTo(mediaItem.ReleaseDate);
     }
     public virtual object Clone() => MemberwiseClone();
     public virtual void Deconstruct(out int year, out Genre genre, out bool isAvailable)

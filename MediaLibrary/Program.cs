@@ -219,7 +219,7 @@ while (true)
             }
         case 11:
             {
-                mediaLibrary.Sort((a, b) => b.ReleaseDate.Year.CompareTo(a.ReleaseDate.Year));
+                mediaLibrary.Sort((a, b) => b.ReleaseDate.CompareTo(a.ReleaseDate));
                 mediaLibrary.PrintAll();
                 break;
             }
@@ -458,7 +458,7 @@ while (true)
                 break;
             }
         default:
-            Console.WriteLine("Выберите корректный пункт меню (1-29).");
+            Console.WriteLine("Выберите корректный пункт меню (1-30).");
             break;
     }
 }
