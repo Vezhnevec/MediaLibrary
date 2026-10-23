@@ -369,7 +369,7 @@ public class MediaLibrary<T> where T : class, IMedia
     {
         int available = 0;
         int issued = 0;
-        int averageYear = 0;
+        int averageAge = 0;
         double sum = 0;
 
         foreach (var item in _items)
@@ -384,14 +384,14 @@ public class MediaLibrary<T> where T : class, IMedia
             }
             sum += DateTime.Now.Year - item.Year;
         }
-        averageYear = (int)(_items.Count > 0 ? Math.Round(sum / _items.Count) : 0);
+        averageAge = (int)(_items.Count > 0 ? Math.Round(sum / _items.Count) : 0);
 
         StringBuilder sb = new StringBuilder();
 
         sb.AppendLine($"Количество элементов: {_items.Count}");
         sb.AppendLine($"Доступно элементов: {available}");
         sb.AppendLine($"Выдано элементов: {issued}");
-        sb.AppendLine($"Средний возраст библиотеки: {averageYear}");
+        sb.AppendLine($"Средний возраст библиотеки: {averageAge}");
 
         Thread.Sleep(1000);
 
