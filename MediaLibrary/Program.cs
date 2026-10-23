@@ -59,7 +59,6 @@ while (true)
     Console.WriteLine("31. Показать статистику");
     Console.WriteLine("======================");
     Console.Write("Выберите пункт меню: ");
-    Console.WriteLine("=== ИНИЦИАЛИЗАЦИЯ ЗАВЕРШЕНА ===");
 
     string input = Console.ReadLine();
     if (!int.TryParse(input, out int choice))

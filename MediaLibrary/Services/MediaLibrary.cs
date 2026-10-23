@@ -32,6 +32,7 @@ public class MediaLibrary<T> where T : class, IMedia
     {
         _items.Add(item);
         _itemsById.Add(item.Id, item);
+        InvalidateCache();
     }
 
     public void PrintAll()
@@ -78,6 +79,7 @@ public class MediaLibrary<T> where T : class, IMedia
         item.IsAvailable = false;
         item.DueDate = DateOnly.FromDateTime(DateTime.Now).AddDays(14);
         OnItemLended?.Invoke(item);
+        InvalidateCache();
         return true;
     }
 
@@ -91,6 +93,7 @@ public class MediaLibrary<T> where T : class, IMedia
         item.IsAvailable = true;
         item.DueDate = null;
         OnItemReturned?.Invoke(item);
+        InvalidateCache();
         return true;
     }
 
@@ -366,8 +369,8 @@ public class MediaLibrary<T> where T : class, IMedia
     {
         int available = 0;
         int issued = 0;
-        int averageAge = 0;
-        int sum = 0;
+        int averageYear = 0;
+        double sum = 0;
 
         foreach (var item in _items)
         {
@@ -381,11 +384,14 @@ public class MediaLibrary<T> where T : class, IMedia
             }
             sum += item.Year;
         }
-        averageAge = _items.Count > 0 ? sum / _items.Count : 0;
+        averageYear = (int)(_items.Count > 0 ? Math.Round(sum / _items.Count) : 0);
 
         StringBuilder sb = new StringBuilder();
 
-        sb.AppendLine($"Количество элементов: {_items.Count}, Доступно элементов: {available}, Выдано элементов: {issued}, Средний возраст библиотеки: {averageAge}");
+        sb.AppendLine($"Количество элементов: {_items.Count}");
+        sb.AppendLine($"Доступно элементов: {available}");
+        sb.AppendLine($"Выдано элементов: {issued}");
+        sb.AppendLine($"Средний возраст библиотеки: {averageYear}");
 
         Thread.Sleep(1000);
 
@@ -395,4 +401,9 @@ public class MediaLibrary<T> where T : class, IMedia
     {
         return _statsCache.Value;
     }
+    private void InvalidateCache()
+    {
+        _statsCache = new Lazy<string>(() => BuildStatistics());
+    }
+
 }
