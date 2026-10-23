@@ -382,7 +382,7 @@ public class MediaLibrary<T> where T : class, IMedia
             {
                 issued++;
             }
-            sum += item.Year;
+            sum += DateTime.Now.Year - item.Year;
         }
         averageYear = (int)(_items.Count > 0 ? Math.Round(sum / _items.Count) : 0);
 
