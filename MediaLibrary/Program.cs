@@ -56,8 +56,10 @@ while (true)
     Console.WriteLine("28. Показать расписание кинопоказа");
     Console.WriteLine("29. Сформировать отчет за период");
     Console.WriteLine("30. Узнать точный возраст элемента");
+    Console.WriteLine("31. Показать статистику");
     Console.WriteLine("======================");
     Console.Write("Выберите пункт меню: ");
+    Console.WriteLine("=== ИНИЦИАЛИЗАЦИЯ ЗАВЕРШЕНА ===");
 
     string input = Console.ReadLine();
     if (!int.TryParse(input, out int choice))
@@ -455,6 +457,11 @@ while (true)
                 {
                     Console.WriteLine($"✗ {ex.Message}");
                 }
+                break;
+            }
+        case 31:
+            {
+                Console.WriteLine(mediaLibrary.ShowStatistics());
                 break;
             }
         default:

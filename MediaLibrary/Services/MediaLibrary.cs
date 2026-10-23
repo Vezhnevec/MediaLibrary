@@ -21,6 +21,13 @@ public class MediaLibrary<T> where T : class, IMedia
     private readonly Stack<T> _recentlyViewed = new Stack<T>();
     private readonly List<LendRequest> _waitlist = new List<LendRequest>();
     private readonly List<Screening> _screening = new List<Screening>();
+    private Lazy<string> _statsCache;
+
+    public MediaLibrary()
+    {
+        _statsCache = new Lazy<string>(() => BuildStatistics());
+    }
+
     public void Add(T item)
     {
         _items.Add(item);
@@ -354,5 +361,38 @@ public class MediaLibrary<T> where T : class, IMedia
         }
         sb.AppendLine($"Найдено {filtered.Count} элементов за период с {startDate} по {endDate}");
         return sb.ToString();
+    }
+    private string BuildStatistics()
+    {
+        int available = 0;
+        int issued = 0;
+        int averageAge = 0;
+        int sum = 0;
+
+        foreach (var item in _items)
+        {
+            if (item.IsAvailable)
+            {
+                available++;
+            }
+            else
+            {
+                issued++;
+            }
+            sum += item.Year;
+        }
+        averageAge = _items.Count > 0 ? sum / _items.Count : 0;
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.AppendLine($"Количество элементов: {_items.Count}, Доступно элементов: {available}, Выдано элементов: {issued}, Средний возраст библиотеки: {averageAge}");
+
+        Thread.Sleep(1000);
+
+        return sb.ToString();
+    }
+    public string ShowStatistics()
+    {
+        return _statsCache.Value;
     }
 }
