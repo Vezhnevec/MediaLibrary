@@ -25,7 +25,7 @@ public class MediaLibrary<T> where T : class, IMedia
 
     public MediaLibrary()
     {
-        _statsCache = new Lazy<string>(() => BuildStatistics());
+        InvalidateCache();
     }
 
     public void Add(T item)
