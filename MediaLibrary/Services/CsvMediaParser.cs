@@ -1,12 +1,7 @@
 ﻿using MediaLibrary.Enums;
-using MediaLibrary.Exceptions;
 using MediaLibrary.Interface;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace MediaLibrary.Services
 {
@@ -16,11 +11,6 @@ namespace MediaLibrary.Services
         {
             var items = new List<IMedia>();
             int errorCount = 0;
-
-            if (!File.Exists(filePath))
-            {
-                throw new FileNotFoundException($"Файл {filePath} не найден");
-            }
 
             using (var reader = new StreamReader(filePath, Encoding.UTF8))
             {

@@ -34,7 +34,17 @@ public class MediaLibrary<T> where T : class, IMedia
         _itemsById.Add(item.Id, item);
         InvalidateCache();
     }
-
+    public bool TryAdd(T item)
+    {
+        if (_items.Contains(item))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     public void PrintAll()
     {
         if (_items.Count == 0)
