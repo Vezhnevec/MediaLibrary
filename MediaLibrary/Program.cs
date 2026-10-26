@@ -5,8 +5,11 @@ using MediaLibrary.Helpers;
 using MediaLibrary.Criteria;
 using MediaLibrary.Queue;
 using MediaLibrary.Models;
+using MediaLibrary.Interface;
+using MediaLibrary.Services;
 // ==================== 7. ГЛАВНОЕ МЕНЮ ====================
 MediaLibrary<MediaItem> mediaLibrary = new MediaLibrary<MediaItem>();
+var parser = new CsvMediaParser();
 
 mediaLibrary.OnItemLended += (item) =>
 {
@@ -57,6 +60,7 @@ while (true)
     Console.WriteLine("29. Сформировать отчет за период");
     Console.WriteLine("30. Узнать точный возраст элемента");
     Console.WriteLine("31. Показать статистику");
+    Console.WriteLine("32. Импорт из CSV");
     Console.WriteLine("======================");
     Console.Write("Выберите пункт меню: ");
 
@@ -278,7 +282,7 @@ while (true)
                 try
                 {
                     int searchId = ConsoleHelper.ReadInt("Введите ID элемента, у которого хотите узнать категорию:");
-                    Console.WriteLine(mediaLibrary.GetCategory(mediaLibrary[searchId])); 
+                    Console.WriteLine(mediaLibrary.GetCategory(mediaLibrary[searchId]));
                 }
                 catch (ItemNotFoundException ex)
                 {
@@ -305,7 +309,7 @@ while (true)
                     Console.WriteLine($"Найдено {result.Count} элементов");
                     foreach (var item in result)
                     {
-                        Console.WriteLine($"{item.GetInfo()}"); 
+                        Console.WriteLine($"{item.GetInfo()}");
                     }
                 }
                 break;
@@ -414,7 +418,7 @@ while (true)
                     {
                         Console.WriteLine("Этот элемент не являеттся фильмом");
                     }
-                    
+
                 }
                 catch (ItemNotFoundException ex)
                 {
@@ -424,7 +428,7 @@ while (true)
             }
         case 28:
             {
-                Console.WriteLine(mediaLibrary.PrintScreeningSchedule()); 
+                Console.WriteLine(mediaLibrary.PrintScreeningSchedule());
                 break;
             }
         case 29:
@@ -463,8 +467,42 @@ while (true)
                 Console.WriteLine(mediaLibrary.ShowStatistics());
                 break;
             }
+        case 32:
+            {
+                string filePath = ConsoleHelper.ReadString("Введите путь до файла");
+                try
+                {
+                    List<IMedia> importItems = parser.ParseFromFile(filePath);
+                    if (importItems.Count > 0)
+                    {
+                        foreach (var item in importItems)
+                        {
+                            if (item is MediaItem mediaItem)
+                            {
+                                mediaLibrary.Add(mediaItem);
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Пропущен элемент '{item.Title}', не является элементом бибилиоттеки");
+                            }
+                        }
+                    }
+                }
+                catch (FileNotFoundException)
+                {
+
+                    Console.WriteLine($"\n Файл '{filePath}' не найден");
+                }
+                catch (Exception ex)
+                {
+
+                    Console.WriteLine($"\n Ошибка: {ex.Message}");
+                }
+                break;
+
+            }
         default:
-            Console.WriteLine("Выберите корректный пункт меню (1-30).");
+            Console.WriteLine("Выберите корректный пункт меню (1-32).");
             break;
     }
 }

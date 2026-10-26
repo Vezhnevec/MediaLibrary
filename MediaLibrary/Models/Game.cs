@@ -5,7 +5,7 @@ public class Game : MediaItem
 {
     public string Platform { get; set; }
 
-    public Game(string title, Genre genre, DateOnly releaseDate, string platform)
+    public Game(string title, Genre genre, DateOnly releaseDate, string platform = "отсутствует")
         : base(title, genre, releaseDate)
     {
         if (string.IsNullOrWhiteSpace(platform))
