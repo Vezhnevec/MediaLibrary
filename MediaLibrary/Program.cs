@@ -479,14 +479,10 @@ while (true)
                         {
                             if (item is MediaItem mediaItem)
                             {
-                                if (mediaLibrary.TryAdd(mediaItem))
+                                if (!mediaLibrary.TryAdd(mediaItem))
                                 {
-                                    Console.WriteLine("Элемент уже добавлен в библиотеку");
-                                }
-                                else
-                                {
-                                    mediaLibrary.Add(mediaItem);
-                                }                                
+                                    Console.WriteLine($"Элемент «{mediaItem.Title}» уже есть в библиотеке — пропущен");
+                                }                              
                             }
                             else
                             {

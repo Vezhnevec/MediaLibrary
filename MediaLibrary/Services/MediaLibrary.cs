@@ -37,13 +37,9 @@ public class MediaLibrary<T> where T : class, IMedia
     public bool TryAdd(T item)
     {
         if (_items.Contains(item))
-        {
-            return true;
-        }
-        else
-        {
             return false;
-        }
+        Add(item);
+        return true;
     }
     public void PrintAll()
     {

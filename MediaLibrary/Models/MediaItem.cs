@@ -49,4 +49,13 @@ public abstract class MediaItem : IMedia, IComparable<MediaItem>
         genre = Genre;
         isAvailable = IsAvailable;
     }
+    public override bool Equals(object? obj)
+    {
+        if (obj is not MediaItem other) return false;
+        return Title.Equals(other.Title, StringComparison.OrdinalIgnoreCase)
+            && ReleaseDate == other.ReleaseDate
+            && Genre == other.Genre;
+    }
+    public override int GetHashCode() =>
+        HashCode.Combine(Title.ToLowerInvariant(), ReleaseDate, Genre);
 }
