@@ -61,6 +61,9 @@ while (true)
     Console.WriteLine("30. Узнать точный возраст элемента");
     Console.WriteLine("31. Показать статистику");
     Console.WriteLine("32. Импорт из CSV");
+    Console.WriteLine("33. Установить рейтинг");
+    Console.WriteLine("34. Топ-N");
+    Console.WriteLine("35. Состояние библиотеки");
     Console.WriteLine("======================");
     Console.Write("Выберите пункт меню: ");
 
@@ -502,7 +505,34 @@ while (true)
                     Console.WriteLine($"\n Ошибка: {ex.Message}");
                 }
                 break;
-
+            }
+        case 33:
+            {
+                try
+                {
+                    int searchId = ConsoleHelper.ReadInt("Введите ID элемента, у которого хотите изменить рейтинг(от 1 до 10):");
+                    double rating = ConsoleHelper.ReadDouble("Какой рейтинг хотите установить?");
+                    if (mediaLibrary.SetRating(searchId, rating))
+                    {
+                        Console.WriteLine("Рейттинг установлен");
+                    }
+                }
+                catch (ItemNotFoundException ex)
+                {
+                    Console.WriteLine($"✗ {ex.Message}");
+                }
+                break;
+            }
+        case 34:
+            {
+                int count = ConsoleHelper.ReadInt("Топ из скольки позиций хотите отобразить?");
+                Console.WriteLine(mediaLibrary.GetTopRated(count));
+                break;
+            }
+        case 35:
+            {
+                Console.WriteLine(mediaLibrary.PrintLibraryHealth());
+                break;
             }
         default:
             Console.WriteLine("Выберите корректный пункт меню (1-32).");

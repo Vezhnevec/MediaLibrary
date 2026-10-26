@@ -27,7 +27,16 @@ namespace MediaLibrary.Helpers
                 Console.WriteLine("Ошибка: введите целое число.");
             }
         }
-
+        public static double ReadDouble(string prompt)
+        {
+            while (true)
+            {
+                Console.WriteLine(prompt);
+                if (double.TryParse(Console.ReadLine(), out double result) && result < 1 && result > 10)
+                    return result;
+                Console.WriteLine("Ошибка: введите число с плавающей точкой от 1 до 10.");
+            }
+        }
         public static Genre ReadGenre()
         {
             Console.WriteLine("Доступные жанры:");

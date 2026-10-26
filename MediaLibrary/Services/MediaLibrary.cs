@@ -411,5 +411,69 @@ public class MediaLibrary<T> where T : class, IMedia
     {
         _statsCache = new Lazy<string>(() => BuildStatistics());
     }
+    public bool SetRating(int id, double ratinng)
+    {
+        var item = FindById(id);
+        if (item != null)
+        {
+            item.Rating = ratinng;
+            return true;
+        }
+        return false;        
+    }
+    public string GetTopRated(int count)
+    {
+        _items.Sort((a, b) => b.Rating.CompareTo(a.Rating));
+        int position = 0;
+        if (_items.Count > 0)
+        {
+            StringBuilder sb = new StringBuilder();
+            int limit = Math.Min(count, _items.Count);
 
+            for (int i = 0; i < limit; i++)
+            {
+                position++;
+                var item = _items[i];
+                sb.AppendLine($"{position}. {item.Title} - рейтинг {item.Rating}");
+
+            }
+            return sb.ToString();
+        }
+        else
+        {
+            return "Библиотека пуста";
+        }        
+    }
+    public string PrintLibraryHealth()
+    {
+        if (_items.Count == 0)
+        {
+            return"Библиотека пуста";            
+        }
+        double sumRating = 0;
+        double sumAge = 0;
+        foreach (var item in _items)
+        {
+            sumAge += DateTime.Now.Year - item.Year;
+            sumRating += item.Rating;
+        }
+
+        int averageAge = (int)(_items.Count > 0 ? Math.Round(sumAge / _items.Count) : 0);
+        double averageRating = sumRating / _items.Count;
+
+        double max = _items.Max(item => item.Rating);
+        double min = _items.Min(item => item.Rating);
+        double scattering = max - min;
+
+        double variance = _items.Average(item => Math.Pow(item.Rating - averageRating, 2));
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.AppendLine($"Средний рейтинг: {averageRating}");
+        sb.AppendLine($"Разброс: {scattering}");
+        sb.AppendLine($"Индекс новизны: {averageAge}");
+        sb.AppendLine($"Отклонение рейтинга каждого элемента от среднего: {Math.Sqrt(variance)}");
+
+        return sb.ToString();
+    }
 }
