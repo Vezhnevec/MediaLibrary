@@ -419,36 +419,30 @@ public class MediaLibrary<T> where T : class, IMedia
             item.Rating = ratinng;
             return true;
         }
-        return false;        
+        return false;
     }
     public string GetTopRated(int count)
     {
-        _items.Sort((a, b) => b.Rating.CompareTo(a.Rating));
-        int position = 0;
-        if (_items.Count > 0)
+
+        if (_items.Count == 0) return "Библиотека пуста.";
+
+        var sorted = new List<IMedia>(_items); 
+        sorted.Sort((a, b) => b.Rating.CompareTo(a.Rating));
+
+        int take = Math.Min(count, sorted.Count);    
+        var sb = new StringBuilder();
+        for (int i = 0; i < take; i++)
         {
-            StringBuilder sb = new StringBuilder();
-            int limit = Math.Min(count, _items.Count);
-
-            for (int i = 0; i < limit; i++)
-            {
-                position++;
-                var item = _items[i];
-                sb.AppendLine($"{position}. {item.Title} - рейтинг {item.Rating}");
-
-            }
-            return sb.ToString();
+            sb.AppendLine($"#{i + 1} {sorted[i].Title} | Рейтинг: {sorted[i].Rating:F1}");
         }
-        else
-        {
-            return "Библиотека пуста";
-        }        
+        return sb.ToString();
+
     }
     public string PrintLibraryHealth()
     {
         if (_items.Count == 0)
         {
-            return"Библиотека пуста";            
+            return "Библиотека пуста";
         }
         double sumRating = 0;
         double sumAge = 0;
@@ -469,9 +463,9 @@ public class MediaLibrary<T> where T : class, IMedia
 
         StringBuilder sb = new StringBuilder();
 
-        sb.AppendLine($"Средний рейтинг: {averageRating}");
-        sb.AppendLine($"Разброс: {scattering}");
-        sb.AppendLine($"Индекс новизны: {averageAge}");
+        sb.AppendLine($"Средний рейтинг: {Math.Round(averageRating, 1)}");
+        sb.AppendLine($"Разброс: {Math.Round(scattering, 2)}");
+        sb.AppendLine($"Индекс новизны: {Math.Round(Math.Sqrt(variance), 2)}");
         sb.AppendLine($"Отклонение рейтинга каждого элемента от среднего: {Math.Sqrt(variance)}");
 
         return sb.ToString();

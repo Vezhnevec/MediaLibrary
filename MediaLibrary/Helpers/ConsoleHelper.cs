@@ -32,7 +32,7 @@ namespace MediaLibrary.Helpers
             while (true)
             {
                 Console.WriteLine(prompt);
-                if (double.TryParse(Console.ReadLine(), out double result) && result < 1 && result > 10)
+                if (double.TryParse(Console.ReadLine(), out double result) && result >= 1 && result <= 10)
                     return result;
                 Console.WriteLine("Ошибка: введите число с плавающей точкой от 1 до 10.");
             }
