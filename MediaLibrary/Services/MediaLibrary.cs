@@ -464,9 +464,9 @@ public class MediaLibrary<T> where T : class, IMedia
         StringBuilder sb = new StringBuilder();
 
         sb.AppendLine($"Средний рейтинг: {Math.Round(averageRating, 1)}");
-        sb.AppendLine($"Разброс: {Math.Round(scattering, 2)}");
-        sb.AppendLine($"Индекс новизны: {Math.Round(Math.Sqrt(variance), 2)}");
-        sb.AppendLine($"Отклонение рейтинга каждого элемента от среднего: {Math.Sqrt(variance)}");
+        sb.AppendLine($"Разброс рейтинга: {Math.Round(scattering, 2)}");
+        sb.AppendLine($"Индекс новизны (средний возраст): {averageAge} лет");
+        sb.AppendLine($"Стандартное отклонение рейтинга: {Math.Round(Math.Sqrt(variance), 2)}");
 
         return sb.ToString();
     }
