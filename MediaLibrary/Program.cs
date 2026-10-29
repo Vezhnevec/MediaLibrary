@@ -467,7 +467,46 @@ while (true)
             }
         case 31:
             {
-                Console.WriteLine(mediaLibrary.ShowStatistics());
+                using var manualCts = new CancellationTokenSource();
+                using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(manualCts.Token, timeoutCts.Token);
+
+                var ct = linkedCts.Token;
+
+                ConsoleCancelEventHandler? cancelHandler;
+                cancelHandler = (sender, e) =>
+                {
+                    e.Cancel = true;
+
+                    manualCts.Cancel();
+                    Console.WriteLine("Получен сигнал Ctrl+C. Отмена загрузки статистики...");
+                };
+
+                try
+                {
+                    Console.CancelKeyPress += cancelHandler;
+
+                    Console.WriteLine("Загрузка статистики... (нажмите 'Ctrl+C' для отмены или ждите 10 секунд)");
+
+                    var stats = await mediaLibrary.ShowStatisticsAsync(ct);
+
+                    Console.WriteLine(stats);
+                }
+                catch (OperationCanceledException)
+                {
+                    if (timeoutCts.IsCancellationRequested)
+                        Console.WriteLine("Время ожидания истекло. Операция прервана");
+                    else
+                        Console.WriteLine("Загрузка статистики отменена пользователем");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Произошла ошибка: {ex.Message}");
+                }
+                finally
+                {
+                    Console.CancelKeyPress -= cancelHandler;
+                }
                 break;
             }
         case 32:
@@ -485,7 +524,7 @@ while (true)
                                 if (!mediaLibrary.TryAdd(mediaItem))
                                 {
                                     Console.WriteLine($"Элемент «{mediaItem.Title}» уже есть в библиотеке — пропущен");
-                                }                              
+                                }
                             }
                             else
                             {

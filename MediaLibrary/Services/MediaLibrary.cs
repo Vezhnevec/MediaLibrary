@@ -21,7 +21,8 @@ public class MediaLibrary<T> where T : class, IMedia
     private readonly Stack<T> _recentlyViewed = new Stack<T>();
     private readonly List<LendRequest> _waitlist = new List<LendRequest>();
     private readonly List<Screening> _screening = new List<Screening>();
-    private Lazy<string> _statsCache;
+    private Task<string>? _statsCache;
+    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
     public MediaLibrary()
     {
@@ -371,15 +372,21 @@ public class MediaLibrary<T> where T : class, IMedia
         sb.AppendLine($"Найдено {filtered.Count} элементов за период с {startDate} по {endDate}");
         return sb.ToString();
     }
-    private string BuildStatistics()
+    private async Task<string> BuildStatisticsAsync(CancellationToken internalToken)
     {
         int available = 0;
         int issued = 0;
         int averageAge = 0;
         double sum = 0;
 
+        await Task.Delay(3000, internalToken);
+
+        internalToken.ThrowIfCancellationRequested();
+
         foreach (var item in _items)
         {
+            internalToken.ThrowIfCancellationRequested();
+
             if (item.IsAvailable)
             {
                 available++;
@@ -399,17 +406,50 @@ public class MediaLibrary<T> where T : class, IMedia
         sb.AppendLine($"Выдано элементов: {issued}");
         sb.AppendLine($"Средний возраст библиотеки: {averageAge}");
 
-        Thread.Sleep(1000);
-
         return sb.ToString();
     }
-    public string ShowStatistics()
+    public async Task<string> ShowStatisticsAsync(CancellationToken callerToken)
     {
-        return _statsCache.Value;
+        if (_statsCache != null)
+        {
+            return await AwaitWithCallerTokenAsync(_statsCache, callerToken);
+        }
+
+        await _semaphore.WaitAsync(callerToken);
+
+        try
+        {
+            if (_statsCache == null)
+            {
+                var internalCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
+                _statsCache = BuildStatisticsAsync(internalCts.Token);
+            }
+
+            return await AwaitWithCallerTokenAsync(_statsCache, callerToken);
+        }
+        catch (OperationCanceledException) when (callerToken.IsCancellationRequested)
+        {
+            Console.WriteLine(" Вы отменили ожидание, но вычисления продолжаются в фоне.");
+            throw;
+        }
+        catch (Exception)
+        {
+            _statsCache = null;
+            throw;
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
     private void InvalidateCache()
     {
-        _statsCache = new Lazy<string>(() => BuildStatistics());
+        _statsCache = null;
+    }
+    private async Task<string> AwaitWithCallerTokenAsync(Task<string> task, CancellationToken callerToken)
+    {
+        return await task.WaitAsync(callerToken);
     }
     public bool SetRating(int id, double ratinng)
     {
@@ -426,10 +466,10 @@ public class MediaLibrary<T> where T : class, IMedia
 
         if (_items.Count == 0) return "Библиотека пуста.";
 
-        var sorted = new List<IMedia>(_items); 
+        var sorted = new List<IMedia>(_items);
         sorted.Sort((a, b) => b.Rating.CompareTo(a.Rating));
 
-        int take = Math.Min(count, sorted.Count);    
+        int take = Math.Min(count, sorted.Count);
         var sb = new StringBuilder();
         for (int i = 0; i < take; i++)
         {
