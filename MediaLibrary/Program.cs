@@ -9,7 +9,6 @@ using MediaLibrary.Interface;
 using MediaLibrary.Services;
 // ==================== 7. ГЛАВНОЕ МЕНЮ ====================
 MediaLibrary<MediaItem> mediaLibrary = new MediaLibrary<MediaItem>();
-var parser = new CsvMediaParser();
 
 mediaLibrary.OnItemLended += (item) =>
 {
@@ -511,37 +510,80 @@ while (true)
             }
         case 32:
             {
-                string filePath = ConsoleHelper.ReadString("Введите путь до файла");
+                using var cts = new CancellationTokenSource();
+                var ct = cts.Token;
+
+                int addedCount = 0;
+                int skippedCount = 0;
+                int errorCount = 0;
+                int count = 0;
+
+                ConsoleCancelEventHandler cancelHandler = (sender, e) =>
+                {
+                    e.Cancel = true;
+                    cts.Cancel();
+                    Console.WriteLine("Отмена импорта");
+                };
+
                 try
                 {
-                    List<IMedia> importItems = parser.ParseFromFile(filePath);
-                    if (importItems.Count > 0)
+                    var parser = new CsvMediaParser();
+
+                    string filePath = ConsoleHelper.ReadString("Введите путь до файла");
+                    Console.CancelKeyPress += cancelHandler;
+
+                    await foreach (var result in parser.ParseFromFileAsync(filePath, ct))
                     {
-                        foreach (var item in importItems)
+                        count++;
+
+                        if (result.IsSuccess)
                         {
-                            if (item is MediaItem mediaItem)
+                            if (result.Item is MediaItem mediaItem)
                             {
-                                if (!mediaLibrary.TryAdd(mediaItem))
+                                if (mediaLibrary.TryAdd(mediaItem))
+                                {
+                                    addedCount++;                                    
+                                }
+                                else
                                 {
                                     Console.WriteLine($"Элемент «{mediaItem.Title}» уже есть в библиотеке — пропущен");
+                                    skippedCount++;
                                 }
                             }
-                            else
+                            else if (result.Item is not null)
                             {
-                                Console.WriteLine($"Пропущен элемент '{item.Title}', не является элементом библиотеки");
+                                Console.WriteLine($"Пропущен элемент '{result.Item.Title}', не является элементом библиотеки");
                             }
                         }
+                        else
+                        {
+                            Console.WriteLine($"Строка {result.LineNumber}: {result.ErrorMessage}");
+                            errorCount++;
+                        }
+                        if (count % 10 == 0)
+                        {
+                            Console.WriteLine($"Обработано {count} элементов...");
+
+                        }
                     }
+
+                    Console.WriteLine($"\nИмпорт завершен. Добавлено: {addedCount}, Пропущено: {skippedCount}, Ошибок: {errorCount}");
+                }
+                catch (OperationCanceledException)
+                {
+                    Console.WriteLine($"Импорт отменён. Добавлено: {addedCount}, Пропущено: {skippedCount}, Ошибок: {errorCount}");
                 }
                 catch (FileNotFoundException)
                 {
-
-                    Console.WriteLine($"\n Файл '{filePath}' не найден");
+                    Console.WriteLine("Файл не найден");
                 }
                 catch (Exception ex)
                 {
-
-                    Console.WriteLine($"\n Ошибка: {ex.Message}");
+                    Console.WriteLine($"Ошибка! Текст ошибки: {ex.Message}");
+                }
+                finally
+                {
+                    Console.CancelKeyPress -= cancelHandler;
                 }
                 break;
             }
